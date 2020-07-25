@@ -4,6 +4,8 @@
 #include "OpenDoor.h"
 #include "GameFramework/Actor.h"
 #include "Math/Rotator.h"
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
@@ -21,9 +23,17 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//set initial position, set target position
+	InitialYaw = GetOwner()->GetActorRotation().Yaw;
+	DoorAngleChange += InitialYaw;
 
-	TargetYaw = GetOwner()->GetActorRotation().Yaw + 90.0f;
+	//null check, error message
+	if(!PressurePlate){
+		UE_LOG(LogTemp, Error, TEXT("Actor has the open door component, but no pressureplate set."));
+	}
 
+	//set player as actor
+	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 	
 }
 
@@ -33,15 +43,50 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *GetOwner()->GetActorRotation().ToString());
-	UE_LOG(LogTemp, Warning, TEXT("Yaw is: %f"), GetOwner()->GetActorRotation().Yaw);
-
-	FRotator CurrentRotation = GetOwner()->GetActorRotation();
-
-	CurrentRotation.Yaw = FMath::Lerp(CurrentRotation.Yaw, TargetYaw, 0.03f);
-
-	GetOwner()->SetActorRotation(CurrentRotation);
-
-
+	//pressure plate overlap check
+	if(PressurePlate->IsOverlappingActor(ActorThatOpens)){
+		OpenDoor(DeltaTime);
+		DoorLastOpened = GetWorld()->GetTimeSeconds();
+	}
+	else{
+		//check if within door close delay
+		float CurrentTime = GetWorld()->GetTimeSeconds();
+		if(CurrentTime - DoorLastOpened > DoorCloseDelay){
+			CloseDoor(DeltaTime);
+		}
+	}
 }
 
+
+void UOpenDoor::OpenDoor(float DeltaTime)
+{
+	//lerp door rotation
+	FRotator CurrentRotation = GetOwner()->GetActorRotation();
+	CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, DoorAngleChange, DeltaTime, DoorOpenSpeed);
+
+	//rotation fix
+	if(CurrentRotation.Yaw>180.f){
+		CurrentRotation.Yaw-=360.f;
+		DoorAngleChange-=360.f;
+	}
+
+	//set new rotation
+	GetOwner()->SetActorRotation(CurrentRotation);
+}
+
+
+void UOpenDoor::CloseDoor(float DeltaTime)
+{
+	//lerp door rotation
+	FRotator CurrentRotation = GetOwner()->GetActorRotation();
+	CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, InitialYaw, DeltaTime, DoorCloseSpeed);
+
+	//rotation fix
+	if(CurrentRotation.Yaw>180.f){
+		CurrentRotation.Yaw-=360.f;
+		DoorAngleChange-=360.f;
+	}
+
+	//set new rotation
+	GetOwner()->SetActorRotation(CurrentRotation);
+}

@@ -22,12 +22,12 @@ void UWorldPosition::BeginPlay()
 
 	FString ObjectName = GetOwner()->GetName();
 
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *GetOwner()->GetName());
+	// UE_LOG(LogTemp, Warning, TEXT("%s"), *GetOwner()->GetName());
 
 	// FString ObjectPosition = GetOwner()->GetActorLocation().ToCompactString();
 	FString ObjectPosition = GetOwner()->GetActorLocation().ToString();
 
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *ObjectPosition);
+	// UE_LOG(LogTemp, Warning, TEXT("%s"), *ObjectPosition);
 
 
 }
