@@ -5,6 +5,7 @@
 #include "Engine/World.h"
 #include "UObject/WeakObjectPtrTemplates.h"
 #include "GameFramework/PlayerController.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 
 #define OUT
 
@@ -21,44 +22,6 @@ void UGrabber::BeginPlay()
 	Super::BeginPlay();
 	FindPhysicsHandle();
 	SetInputComponentAndBindings();
-}
-
-void UGrabber::Grab()
-{
-	UE_LOG(LogTemp, Warning, TEXT("grabber pressed"));
-
-	//get and set players viewpoint
-	FVector PlayerViewPoint_Location;
-	FRotator PlayerViewPoint_Rotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewPoint_Location, 
-		OUT PlayerViewPoint_Rotation
-	);
-
-	//end of line trace
-	FVector LineTraceEnd = PlayerViewPoint_Location + PlayerViewPoint_Rotation.Vector()*Reach;
-
-
-
-
-
-	FHitResult HitResult = GetFirstPhysicsBodyWithinReach();
-	UPrimitiveComponent* ComponentToGrab = HitResult.GetComponent();
-
-	//if something hits, attach physics component
-	if(HitResult.GetActor()){
-		PhysicsHandle->GrabComponentAtLocation(
-			ComponentToGrab,
-			NAME_None,
-			LineTraceEnd
-		);
-	}
-
-}
-
-void UGrabber::Release()
-{
-	PhysicsHandle->ReleaseComponent();
 }
 
 void UGrabber::FindPhysicsHandle()
@@ -80,56 +43,74 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	//get and set players viewpoint
-	FVector PlayerViewPoint_Location;
-	FRotator PlayerViewPoint_Rotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewPoint_Location, 
-		OUT PlayerViewPoint_Rotation
-	);
-
-	//end of line trace
-	FVector LineTraceEnd = PlayerViewPoint_Location + PlayerViewPoint_Rotation.Vector()*Reach;
-
-
-
+	//if holding an item
 	if(PhysicsHandle->GrabbedComponent){
-		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+
+		//store OldYaw
+		float OldYaw = VP_Structure.PlayerViewPoint_Rotation.Yaw;
+
+		BuildPlayerViewPointStructure();
+
+		//set location of target object
+		PhysicsHandle->SetTargetLocation(VP_Structure.LineTraceEnd);
+
+
+		//Get YawChange, Set new object rotation
+		float YawChange = VP_Structure.PlayerViewPoint_Rotation.Yaw - OldYaw;
+		VP_Structure.ObjectRotation.Yaw += YawChange;
+		PhysicsHandle->SetTargetRotation(VP_Structure.ObjectRotation);
+	}
+}
+
+void UGrabber::Grab()
+{
+	BuildPlayerViewPointStructure();
+	
+	//if something hits, attach physics component
+	if(VP_Structure.HitResult.GetActor()){
+		PhysicsHandle->GrabComponentAtLocationWithRotation(
+			VP_Structure.ComponentToGrab,
+			NAME_None,
+			VP_Structure.LineTraceEnd,
+			VP_Structure.ObjectRotation
+		);
 	}
 
 }
 
-FHitResult const UGrabber::GetFirstPhysicsBodyWithinReach()
+void UGrabber::Release()
 {
-	//get and set players viewpoint
-	FVector PlayerViewPoint_Location;
-	FRotator PlayerViewPoint_Rotation;
+	PhysicsHandle->ReleaseComponent();
+}
+
+void UGrabber::BuildPlayerViewPointStructure()
+{
+	//set Location and Rotation of Player
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewPoint_Location, 
-		OUT PlayerViewPoint_Rotation
+		OUT VP_Structure.PlayerViewPoint_Location, 
+		OUT VP_Structure.PlayerViewPoint_Rotation
 	);
 
-	//end of line trace
-	FVector LineTraceEnd = PlayerViewPoint_Location + PlayerViewPoint_Rotation.Vector()*Reach;
+	//Set End of Line Trace On First Physics Object, within REACH
+	VP_Structure.LineTraceEnd = VP_Structure.PlayerViewPoint_Location + VP_Structure.PlayerViewPoint_Rotation.Vector()*Reach;
 
-	//list of collisions to ignore...I think.
+	//list of collisions to ignore, just your pawn
 	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
 
-	//set Hit, if object type if physics body
-	FHitResult Hit;
+	//set HitResult, if object type if physics body
 	GetWorld()->LineTraceSingleByObjectType(
-		OUT Hit,
-		PlayerViewPoint_Location,
-		LineTraceEnd,
+		OUT VP_Structure.HitResult,
+		VP_Structure.PlayerViewPoint_Location,
+		VP_Structure.LineTraceEnd,
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParams
 	);
 
-	//get object that hit, print name
-	AActor* ActorHit = Hit.GetActor();
-	if (ActorHit){
-		UE_LOG(LogTemp, Warning, TEXT("Line trace hit: %s"), *(ActorHit->GetName()));
-	}
+	//set ComponentToGrab;
+	VP_Structure.ComponentToGrab = VP_Structure.HitResult.GetComponent();
 
-	return Hit;
+	//get target object rotation
+	if(VP_Structure.HitResult.GetActor()){
+		VP_Structure.ObjectRotation = VP_Structure.HitResult.GetActor()->GetActorRotation();
+	}
 }

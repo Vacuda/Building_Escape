@@ -4,8 +4,12 @@
 #include "OpenDoor.h"
 #include "GameFramework/Actor.h"
 #include "Math/Rotator.h"
+#include "Engine/TriggerVolume.h"
 #include "Engine/World.h"
+#include "Components/PrimitiveComponent.h"
 #include "GameFramework/PlayerController.h"
+
+#define OUT
 
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
@@ -13,12 +17,8 @@ UOpenDoor::UOpenDoor()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
-
-// Called when the game starts
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
@@ -30,21 +30,14 @@ void UOpenDoor::BeginPlay()
 	//null check, error message
 	if(!PressurePlate){
 		UE_LOG(LogTemp, Error, TEXT("Actor has the open door component, but no pressureplate set."));
-	}
-
-	//set player as actor
-	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
-	
+	}	
 }
 
-
-// Called every frame
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	//pressure plate overlap check
-	if(PressurePlate->IsOverlappingActor(ActorThatOpens)){
+	if(TotalMassOfActors()>=MassToOpenDoor){
 		OpenDoor(DeltaTime);
 		DoorLastOpened = GetWorld()->GetTimeSeconds();
 	}
@@ -57,16 +50,15 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	}
 }
 
-
 void UOpenDoor::OpenDoor(float DeltaTime)
 {
-	//lerp door rotation
+	//door rotation
 	FRotator CurrentRotation = GetOwner()->GetActorRotation();
 	CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, DoorAngleChange, DeltaTime, DoorOpenSpeed);
 
 	//rotation fix
 	if(CurrentRotation.Yaw>180.f){
-		CurrentRotation.Yaw-=360.f;
+		CurrentRotation.Yaw-=360.f; 
 		DoorAngleChange-=360.f;
 	}
 
@@ -74,10 +66,9 @@ void UOpenDoor::OpenDoor(float DeltaTime)
 	GetOwner()->SetActorRotation(CurrentRotation);
 }
 
-
 void UOpenDoor::CloseDoor(float DeltaTime)
 {
-	//lerp door rotation
+	//door rotation
 	FRotator CurrentRotation = GetOwner()->GetActorRotation();
 	CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, InitialYaw, DeltaTime, DoorCloseSpeed);
 
@@ -89,4 +80,19 @@ void UOpenDoor::CloseDoor(float DeltaTime)
 
 	//set new rotation
 	GetOwner()->SetActorRotation(CurrentRotation);
+}
+
+float const UOpenDoor::TotalMassOfActors(){
+	float TotalMass = 0.f;
+
+	//find all overlapping actors
+	TArray<AActor*> OverlappingActorsArr;
+	PressurePlate->GetOverlappingActors(OUT OverlappingActorsArr);
+
+	//add masses in the object array
+	for(AActor* Actor:OverlappingActorsArr){
+		TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+	}
+
+	return TotalMass;
 }
