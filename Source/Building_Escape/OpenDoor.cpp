@@ -6,6 +6,7 @@
 #include "Math/Rotator.h"
 #include "Engine/TriggerVolume.h"
 #include "Engine/World.h"
+#include "WeightCheck.h"
 #include "Components/PrimitiveComponent.h"
 #include "GameFramework/PlayerController.h"
 
@@ -27,10 +28,10 @@ void UOpenDoor::BeginPlay()
 	InitialYaw = GetOwner()->GetActorRotation().Yaw;
 	DoorAngleChange += InitialYaw;
 
-	//null check, error message
-	if(!PressurePlate){
-		UE_LOG(LogTemp, Error, TEXT("Actor has the open door component, but no pressureplate set."));
-	}	
+	// //null check, error message
+	// if(!PressurePlate){
+	// 	UE_LOG(LogTemp, Error, TEXT("Actor has the open door component, but no pressureplate set."));
+	// }	
 }
 
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
