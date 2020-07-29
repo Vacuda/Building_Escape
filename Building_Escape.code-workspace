@@ -9,5 +9,8 @@
 	],
 	"settings": {
 		"typescript.tsc.autoDetect": "off",
+		"files.associations": {
+			"tuple": "cpp"
+		},
 	}
 }

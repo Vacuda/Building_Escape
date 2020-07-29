@@ -33,6 +33,7 @@ private:
 	float Final_Z;
 	UWeightCheck* WeightCheckComponent;
 	bool bIsStoneSet = false;
+	void LockDoorsOpen();
 
 	UPROPERTY(EditAnywhere)
 	float Plate_Move_Speed=1.f;

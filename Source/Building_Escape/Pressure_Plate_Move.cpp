@@ -62,6 +62,9 @@ void UPressure_Plate_Move::MovePlate(float DeltaTime)
 	//check
 	if(CurrentLocation.Z <= Final_Z + 2.f){
 		bIsStoneSet = true;
+
+		LockDoorsOpen();
+
 		//stop tick
 		PrimaryComponentTick.SetTickFunctionEnable(false);
 	}
@@ -73,4 +76,20 @@ void UPressure_Plate_Move::MovePlate(float DeltaTime)
 	GetOwner()->SetActorLocation(CurrentLocation);
 }
 
+void UPressure_Plate_Move::LockDoorsOpen()
+{
 
+
+
+
+
+
+
+//find doors with tag PressurePlate_1
+//for each one
+//find OpenDoor Component
+//set bIsDoorSet to true
+
+
+
+}

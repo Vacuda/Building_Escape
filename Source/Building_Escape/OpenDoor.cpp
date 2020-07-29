@@ -10,6 +10,7 @@ UOpenDoor::UOpenDoor()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = true;
 }
 
 void UOpenDoor::BeginPlay()
@@ -39,17 +40,20 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		Target_Yaw=Initial_Yaw;
 	}
 	if(MassOnPlate>=25.f && MassOnPlate<50.f){
-		Target_Yaw=Initial_Yaw + (DoorAngleChange/4.f)*1.f;
+		Target_Yaw=Initial_Yaw + (DoorAngleChange/8.f)*1.f;
 	}
 	if(MassOnPlate>=50.f && MassOnPlate<75.f){
-		Target_Yaw=Initial_Yaw + (DoorAngleChange/4.f)*2.f;
+		Target_Yaw=Initial_Yaw + (DoorAngleChange/8.f)*2.f;
 	}
 	if(MassOnPlate>=75.f && MassOnPlate<100.f){
-		Target_Yaw=Initial_Yaw + (DoorAngleChange/4.f)*3.f;
+		Target_Yaw=Initial_Yaw + (DoorAngleChange/8.f)*3.f;
 	}
 	if(MassOnPlate>=100.f){
 		Target_Yaw=Initial_Yaw + DoorAngleChange;
 	}
+
+	RotationCorrection(&Target_Yaw);
+
 	MoveDoor(DeltaTime);
 }
 
@@ -61,12 +65,16 @@ void UOpenDoor::MoveDoor(float DeltaTime)
 	//change rotation according to Target
 	CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, Target_Yaw, DeltaTime, DoorMoveSpeed);
 
-	//rotation fix
-	if(CurrentRotation.Yaw>180.f){
-		CurrentRotation.Yaw-=360.f; 
-		DoorAngleChange-=360.f;
-	}
+	RotationCorrection(&CurrentRotation.Yaw);
 
 	//set new rotation
 	GetOwner()->SetActorRotation(CurrentRotation);
+}
+
+void UOpenDoor::RotationCorrection(float* Yaw)
+{
+	//used to fix rotation yaw if over 180 degrees
+	if(*Yaw>180.f){
+		*Yaw-=360.f; 
+	}
 }

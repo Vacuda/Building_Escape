@@ -27,6 +27,8 @@ private:
 	float Target_Yaw;
 	float Final_Yaw;
 	UWeightCheck* WeightCheckComponent;
+	bool bIsDoorSet = false;
+	void RotationCorrection(float* Yaw);
 
 	UPROPERTY(EditAnywhere)
 	float DoorMoveSpeed=2.f;
