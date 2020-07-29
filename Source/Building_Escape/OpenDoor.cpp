@@ -20,6 +20,8 @@ void UOpenDoor::BeginPlay()
 	Initial_Yaw = GetOwner()->GetActorRotation().Yaw;
 	Target_Yaw = Initial_Yaw;
 	Final_Yaw = DoorAngleChange + Initial_Yaw;	
+
+	WeightCheckComponent = GetOwner()->FindComponentByClass<UWeightCheck>();
 }
 
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -27,8 +29,7 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	//get MassOnPlate
-	// float MassOnPlate = WeightCheckComponent->TotalMassOfActors();
-	float MassOnPlate = 50.f;
+	float MassOnPlate = WeightCheckComponent->TotalMassOfActors();
 
 	//Set Target_Yaw based on MassOnPlate
 	if(MassOnPlate<=0.f){

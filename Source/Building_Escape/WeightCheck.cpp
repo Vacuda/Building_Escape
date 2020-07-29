@@ -26,7 +26,7 @@ void UWeightCheck::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-float UWeightCheck::TotalMassOfActors(){
+float const UWeightCheck::TotalMassOfActors(){
 	float TotalMass = 0.f;
 
 	//find all overlapping actors

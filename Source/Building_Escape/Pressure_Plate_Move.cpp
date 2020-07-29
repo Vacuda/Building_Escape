@@ -11,16 +11,17 @@ UPressure_Plate_Move::UPressure_Plate_Move()
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
 
-	// ...
 }
 
 void UPressure_Plate_Move::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//setup initial values
 	Initial_Z = GetOwner()->GetActorLocation().Z;
 	Final_Z = Initial_Z - Plate_Depression_Amount;
 
+	//setup WeightCheckComponent
 	WeightCheckComponent = GetOwner()->FindComponentByClass<UWeightCheck>();
 }
 
