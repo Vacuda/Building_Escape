@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
-#include "Engine/TriggerVolume.h"
+#include "Engine/TriggerVolume.h" //for TriggerVolume
+#include "GameFramework/Actor.h"  //for AActor
 #include "WeightCheck.generated.h"
 
 
@@ -25,7 +25,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	float const TotalMassOfActors();
+	float TotalMassOfActors();
 
 private:
 	UPROPERTY(EditAnywhere)

@@ -2,9 +2,6 @@
 
 
 #include "WeightCheck.h"
-#include "Pressure_Plate_Move.h"
-#include "OpenDoor.h"
-#include "GameFramework/Actor.h"
 
 // Sets default values for this component's properties
 UWeightCheck::UWeightCheck()
@@ -18,10 +15,10 @@ void UWeightCheck::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// //null check, error message
-	// if(!PressurePlate){
-	// 	UE_LOG(LogTemp, Error, TEXT("Actor has the open door component, but no pressureplate set."));
-	// }	
+	//null check, error message
+	if(!PressurePlate){
+		UE_LOG(LogTemp, Error, TEXT("Actor has the open door component, but no pressureplate set."));
+	}	
 }
 
 void UWeightCheck::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -29,7 +26,7 @@ void UWeightCheck::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-float const UWeightCheck::TotalMassOfActors(){
+float UWeightCheck::TotalMassOfActors(){
 	float TotalMass = 0.f;
 
 	//find all overlapping actors

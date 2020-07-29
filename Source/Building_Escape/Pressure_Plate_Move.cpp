@@ -1,10 +1,7 @@
 // Copyright Vacuda 2020
 
 #include "Pressure_Plate_Move.h"
-#include "Engine/World.h"
-#include "GameFramework/Actor.h"
-#include "WeightCheck.h"
-#include "GameFramework/PlayerController.h"
+#include "WeightCheck.h" //for WeightCheck
 
 // Sets default values for this component's properties
 UPressure_Plate_Move::UPressure_Plate_Move()

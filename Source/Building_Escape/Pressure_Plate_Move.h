@@ -3,9 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
-#include "Engine/TriggerVolume.h"
-#include "WeightCheck.h"
+#include "WeightCheck.h" //for WeightCheck
 #include "Pressure_Plate_Move.generated.h"
 
 

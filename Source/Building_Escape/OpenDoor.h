@@ -3,9 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
-#include "Engine/TriggerVolume.h"
-#include "WeightCheck.h"
+#include "WeightCheck.h"  //for WeightCheck
 #include "OpenDoor.generated.h"
 
 
@@ -22,30 +20,20 @@ protected:
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	void OpenDoor(float DeltaTime);
-	void CloseDoor(float DeltaTime);
-	float const TotalMassOfActors();
+	void MoveDoor(float DeltaTime);
 
 private:
-	float InitialYaw;
-	float DoorLastOpened=0.f;
+	float Initial_Yaw;
+	float Target_Yaw;
+	float Final_Yaw;
+	UWeightCheck* WeightCheckComponent;
 
 	UPROPERTY(EditAnywhere)
-	float DoorCloseDelay=4.f;
-
-	UPROPERTY(EditAnywhere)
-	float DoorOpenSpeed=2.f;
-
-	UPROPERTY(EditAnywhere)
-	float DoorCloseSpeed=3.f;
+	float DoorMoveSpeed=2.f;
 
 	UPROPERTY(EditAnywhere)
 	float DoorAngleChange = 90.f;
 
 	UPROPERTY(EditAnywhere)
-	ATriggerVolume* PressurePlate;
-
-	UPROPERTY(EditAnywhere)
 	float MassToOpenDoor = 100.f;
-	
 };
