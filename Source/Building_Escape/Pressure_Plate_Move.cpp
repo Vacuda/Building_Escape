@@ -1,7 +1,7 @@
 // Copyright Vacuda 2020
 
 #include "Pressure_Plate_Move.h"
-#include "WeightCheck.h" //for WeightCheck
+#include "PressurePlate.h" //for PressurePlate
 
 // Sets default values for this component's properties
 UPressure_Plate_Move::UPressure_Plate_Move()
@@ -10,7 +10,6 @@ UPressure_Plate_Move::UPressure_Plate_Move()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
-
 }
 
 void UPressure_Plate_Move::BeginPlay()
@@ -21,34 +20,34 @@ void UPressure_Plate_Move::BeginPlay()
 	Initial_Z = GetOwner()->GetActorLocation().Z;
 	Final_Z = Initial_Z - Plate_Depression_Amount;
 
-	//setup WeightCheckComponent
-	WeightCheckComponent = GetOwner()->FindComponentByClass<UWeightCheck>();
+	//setup PressurePlateRootComponent
+	PressurePlateRootComponent = GetOwner()->FindComponentByClass<UPressurePlate>();
 }
 
 void UPressure_Plate_Move::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	//get MassOnPlate
-	float MassOnPlate = WeightCheckComponent->TotalMassOfActors();
+	//get TotalMassOnPlate, ptr to the address of it on the Root Component
+	float* TotalMassOnPlate = &(PressurePlateRootComponent->TotalMassOnPlate);          
 
-	//Set Target_Z based on MassOnPlate
-	if(MassOnPlate<=0.f){
+	//Set Target_Z based on TotalMassOnPlate
+	if(*TotalMassOnPlate<=0.f){
 		Target_Z=Initial_Z;
 	}
-	if(MassOnPlate>0.f && MassOnPlate<25.f){
+	if(*TotalMassOnPlate>0.f && *TotalMassOnPlate<25.f){
 		Target_Z=Initial_Z;
 	}
-	if(MassOnPlate>=25.f && MassOnPlate<50.f){
+	if(*TotalMassOnPlate>=25.f && *TotalMassOnPlate<50.f){
 		Target_Z=Initial_Z - (Plate_Depression_Amount/4.f)*1.f;
 	}
-	if(MassOnPlate>=50.f && MassOnPlate<75.f){
+	if(*TotalMassOnPlate>=50.f && *TotalMassOnPlate<75.f){
 		Target_Z=Initial_Z - (Plate_Depression_Amount/4.f)*2.f;
 	}
-	if(MassOnPlate>=75.f && MassOnPlate<100.f){
+	if(*TotalMassOnPlate>=75.f && *TotalMassOnPlate<100.f){
 		Target_Z=Initial_Z - (Plate_Depression_Amount/4.f)*3.f;
 	}
-	if(MassOnPlate>=100.f){
+	if(*TotalMassOnPlate>=100.f){
 		Target_Z=Initial_Z - Plate_Depression_Amount;
 	}
 	MovePlate(DeltaTime);
@@ -59,14 +58,10 @@ void UPressure_Plate_Move::MovePlate(float DeltaTime)
 	//get location
 	FVector CurrentLocation = GetOwner()->GetActorLocation();
 
-	//check
+	//Call Dock Plate to lock things up
 	if(CurrentLocation.Z <= Final_Z + 2.f){
-		bIsStoneSet = true;
-
-		LockDoorsOpen();
-
-		//stop tick
-		PrimaryComponentTick.SetTickFunctionEnable(false);
+		PressurePlateRootComponent->DockPlate();
+		return;
 	}
 
 	//change location based on Target_Z
@@ -76,20 +71,19 @@ void UPressure_Plate_Move::MovePlate(float DeltaTime)
 	GetOwner()->SetActorLocation(CurrentLocation);
 }
 
-void UPressure_Plate_Move::LockDoorsOpen()
+void UPressure_Plate_Move::Shutdown()
 {
+	bIsPlateDocked =  true;
 
+	//stop tick
+	PrimaryComponentTick.SetTickFunctionEnable(false);
 
+	//get location
+	FVector CurrentLocation = GetOwner()->GetActorLocation();
 
+	//set final location
+	CurrentLocation.Z = Final_Z;
 
-
-
-
-//find doors with tag PressurePlate_1
-//for each one
-//find OpenDoor Component
-//set bIsDoorSet to true
-
-
-
+	//set location
+	GetOwner()->SetActorLocation(CurrentLocation);
 }

@@ -25,13 +25,11 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	float const TotalMassOfActors();
-
 private:
-	UPROPERTY(EditAnywhere)
-	ATriggerVolume* PressurePlate;
 
+	void SetTotalMassOfActors();
 
+	float TotalMass = 0.f;
 
 		
 };

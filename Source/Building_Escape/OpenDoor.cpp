@@ -2,7 +2,10 @@
 
 
 #include "OpenDoor.h"
-#include "WeightCheck.h"  //for WeightCheck
+#include "Kismet/GameplayStatics.h"  //for getallactorsofclass
+#include "UObject/Class.h"
+// #include "Engine/World.h"  //for getworld
+#include "PressurePlate.h"  //for PressurePlate
 
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
@@ -22,33 +25,35 @@ void UOpenDoor::BeginPlay()
 	Target_Yaw = Initial_Yaw;
 	Final_Yaw = DoorAngleChange + Initial_Yaw;	
 
-	WeightCheckComponent = GetOwner()->FindComponentByClass<UWeightCheck>();
+	//set PressuePlateComponent
+	PressurePlateComponent = DoorTriggerActor->FindComponentByClass<UPressurePlate>();
+
 }
 
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	//get MassOnPlate
-	float MassOnPlate = WeightCheckComponent->TotalMassOfActors();
+	//get TotalMassOnPlate, ptr to the address of it on the Root Component
+	float* TotalMassOnPlate = &(PressurePlateComponent->TotalMassOnPlate); 
 
-	//Set Target_Yaw based on MassOnPlate
-	if(MassOnPlate<=0.f){
+	//Set Target_Yaw based on TotalMassOnPlate
+	if(*TotalMassOnPlate<=0.f){
 		Target_Yaw=Initial_Yaw;
 	}
-	if(MassOnPlate>0.f && MassOnPlate<25.f){
+	if(*TotalMassOnPlate>0.f && *TotalMassOnPlate<25.f){
 		Target_Yaw=Initial_Yaw;
 	}
-	if(MassOnPlate>=25.f && MassOnPlate<50.f){
+	if(*TotalMassOnPlate>=25.f && *TotalMassOnPlate<50.f){
 		Target_Yaw=Initial_Yaw + (DoorAngleChange/8.f)*1.f;
 	}
-	if(MassOnPlate>=50.f && MassOnPlate<75.f){
+	if(*TotalMassOnPlate>=50.f && *TotalMassOnPlate<75.f){
 		Target_Yaw=Initial_Yaw + (DoorAngleChange/8.f)*2.f;
 	}
-	if(MassOnPlate>=75.f && MassOnPlate<100.f){
+	if(*TotalMassOnPlate>=75.f && *TotalMassOnPlate<100.f){
 		Target_Yaw=Initial_Yaw + (DoorAngleChange/8.f)*3.f;
 	}
-	if(MassOnPlate>=100.f){
+	if(*TotalMassOnPlate>=100.f){
 		Target_Yaw=Initial_Yaw + DoorAngleChange;
 	}
 
@@ -65,6 +70,7 @@ void UOpenDoor::MoveDoor(float DeltaTime)
 	//change rotation according to Target
 	CurrentRotation.Yaw = FMath::FInterpTo(CurrentRotation.Yaw, Target_Yaw, DeltaTime, DoorMoveSpeed);
 
+	//possible fix rotation
 	RotationCorrection(&CurrentRotation.Yaw);
 
 	//set new rotation
@@ -77,4 +83,21 @@ void UOpenDoor::RotationCorrection(float* Yaw)
 	if(*Yaw>180.f){
 		*Yaw-=360.f; 
 	}
+}
+
+void UOpenDoor::Shutdown(){
+
+	bIsDoorDocked = true;
+
+	//stop tick
+	PrimaryComponentTick.SetTickFunctionEnable(false);
+
+	//get rotation
+	FRotator CurrentRotation = GetOwner()->GetActorRotation();
+
+	//change to final rotation
+	CurrentRotation.Yaw = Final_Yaw;
+
+	//set new rotation
+	GetOwner()->SetActorRotation(CurrentRotation);
 }

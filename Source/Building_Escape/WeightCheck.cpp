@@ -15,29 +15,26 @@ void UWeightCheck::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//null check, error message
-	if(!PressurePlate){
-		UE_LOG(LogTemp, Error, TEXT("Actor has the open door component, but no pressureplate set."));
-	}	
+
 }
 
 void UWeightCheck::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
 }
 
-float const UWeightCheck::TotalMassOfActors(){
-	float TotalMass = 0.f;
+void UWeightCheck::SetTotalMassOfActors(){
+	//reset
+	TotalMass = 0.f;
 
 	//find all overlapping actors
-	TArray<AActor*> OverlappingActorsArr;
-	PressurePlate->GetOverlappingActors(OUT OverlappingActorsArr);
+	// TArray<AActor*> OverlappingActorsArr;
+	// PressurePlate->GetOverlappingActors(OUT OverlappingActorsArr);
 
-	//add masses in the object array
-	for(AActor* Actor:OverlappingActorsArr){
-		TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
-	}
-
-	return TotalMass;
+	// //add masses in the object array
+	// for(AActor* Actor:OverlappingActorsArr){
+	// 	TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+	// }
 }
 
