@@ -35,7 +35,7 @@ private:
 	float Final_Z;
 
 	UPROPERTY()
-	UPressurePlate* PressurePlateRootComponent;
+	UPressurePlate* PressurePlateRootComponent = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	float Plate_Move_Speed=1.f;

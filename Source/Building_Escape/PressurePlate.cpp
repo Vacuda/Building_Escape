@@ -9,6 +9,8 @@
 #include "OpenDoor.h"  //for UOpenDoor
 #include "Pressure_Plate_Move.h"  //for UPressure_Plate_Move
 
+#define OUT
+
 // Sets default values for this component's properties
 UPressurePlate::UPressurePlate()
 {
@@ -22,9 +24,23 @@ void UPressurePlate::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//ptr check
+	if(!Door_A){return;}
+	if(!Door_B){return;}
+
 	//set door components
 	Door_A_Component = Door_A->FindComponentByClass<UOpenDoor>();
 	Door_B_Component = Door_B->FindComponentByClass<UOpenDoor>();
+
+	//safety check
+	if(!Door_A_Component){
+		UE_LOG(LogTemp, Error, TEXT("No OpenDoor component found on Door A"));
+	}
+
+	//safety check
+	if(!Door_B_Component){
+		UE_LOG(LogTemp, Error, TEXT("No OpenDoor component found on Door B"));
+	}
 
 }
 
@@ -38,6 +54,9 @@ void UPressurePlate::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 void UPressurePlate::SetTotalMassOfActors(){
 	//reset
 	TotalMassOnPlate = 0.f;
+
+	//ptr check
+	if(!PressurePlate) {return;}
 
 	//find all overlapping actors
 	TArray<AActor*> OverlappingActorsArr;
@@ -56,6 +75,10 @@ void UPressurePlate::DockPlate(){
 
 	//trigger shutdown Pressure_Plate_Move
 	GetOwner()->FindComponentByClass<UPressure_Plate_Move>()->Shutdown();
+
+	//ptr check
+	if(!Door_A_Component) {return;}
+	if(!Door_B_Component) {return;}
 
 	//trigger shutdown, Door A and B
 	Door_A_Component->Shutdown();

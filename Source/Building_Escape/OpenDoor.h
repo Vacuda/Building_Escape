@@ -36,10 +36,10 @@ private:
 	void RotationCorrection(float* Yaw);
 
 	UPROPERTY()
-	UPressurePlate* PressurePlateComponent;
+	UPressurePlate* PressurePlateComponent = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	AActor* DoorTriggerActor;
+	AActor* DoorTriggerActor = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	float DoorMoveSpeed=2.f;

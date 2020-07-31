@@ -22,11 +22,19 @@ void UPressure_Plate_Move::BeginPlay()
 
 	//setup PressurePlateRootComponent
 	PressurePlateRootComponent = GetOwner()->FindComponentByClass<UPressurePlate>();
+
+	//safety check
+	if(!PressurePlateRootComponent){
+		UE_LOG(LogTemp, Error, TEXT("No pressure plate root component found"));
+	}
 }
 
 void UPressure_Plate_Move::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	//ptr check
+	if(!PressurePlateRootComponent) {return;}
 
 	//get TotalMassOnPlate, ptr to the address of it on the Root Component
 	float* TotalMassOnPlate = &(PressurePlateRootComponent->TotalMassOnPlate);          
@@ -57,6 +65,9 @@ void UPressure_Plate_Move::MovePlate(float DeltaTime)
 {
 	//get location
 	FVector CurrentLocation = GetOwner()->GetActorLocation();
+
+	//ptr check
+	if(!PressurePlateRootComponent) {return;}
 
 	//Call Dock Plate to lock things up
 	if(CurrentLocation.Z <= Final_Z + 2.f){

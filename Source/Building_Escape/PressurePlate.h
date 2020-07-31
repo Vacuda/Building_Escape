@@ -37,21 +37,21 @@ protected:
 private:
 
 	UPROPERTY(EditAnywhere)
-	AActor* Door_A;
+	AActor* Door_A = nullptr;
 
 	UPROPERTY(EditAnywhere)
-	AActor* Door_B;
+	AActor* Door_B = nullptr;
 
 	UPROPERTY()
-	UOpenDoor* Door_A_Component;
+	UOpenDoor* Door_A_Component = nullptr;
 
 	UPROPERTY()
-	UOpenDoor* Door_B_Component;
+	UOpenDoor* Door_B_Component = nullptr;
 
 	void SetTotalMassOfActors();
 
 	UPROPERTY(EditAnywhere)
-	ATriggerVolume* PressurePlate;
+	ATriggerVolume* PressurePlate = nullptr;
 
 		
 };

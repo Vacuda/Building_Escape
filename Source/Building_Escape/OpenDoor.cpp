@@ -28,11 +28,18 @@ void UOpenDoor::BeginPlay()
 	//set PressuePlateComponent
 	PressurePlateComponent = DoorTriggerActor->FindComponentByClass<UPressurePlate>();
 
+	//safety check
+	if(!PressurePlateComponent){
+		UE_LOG(LogTemp, Error, TEXT("No pressure plate component found on %s!"), *GetOwner()->GetName());
+	}
 }
 
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	//ptr check
+	if(!PressurePlateComponent){return;}
 
 	//get TotalMassOnPlate, ptr to the address of it on the Root Component
 	float* TotalMassOnPlate = &(PressurePlateComponent->TotalMassOnPlate); 

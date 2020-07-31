@@ -20,6 +20,7 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
+
 	FindPhysicsHandle();
 	SetInputComponentAndBindings();
 }
@@ -27,6 +28,11 @@ void UGrabber::BeginPlay()
 void UGrabber::FindPhysicsHandle()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+
+	//safety check
+	if(!PhysicsHandle){
+		UE_LOG(LogTemp, Error, TEXT("No physics handle component found on %s!"), *GetOwner()->GetName());
+	}
 }
 
 void UGrabber::SetInputComponentAndBindings()
@@ -42,6 +48,10 @@ void UGrabber::SetInputComponentAndBindings()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	//ptr check
+	if(!PhysicsHandle) {return;}
+
 
 	//if holding an item
 	if(PhysicsHandle->GrabbedComponent){
@@ -68,6 +78,10 @@ void UGrabber::Grab()
 	
 	//if something hits, attach physics component
 	if(VP_Structure.HitResult.GetActor()){
+
+		//ptr check
+		if(!PhysicsHandle) {return;}
+
 		PhysicsHandle->GrabComponentAtLocationWithRotation(
 			VP_Structure.ComponentToGrab,
 			NAME_None,
@@ -80,6 +94,9 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
+	//ptr check
+	if(!PhysicsHandle) {return;}
+
 	PhysicsHandle->ReleaseComponent();
 }
 
