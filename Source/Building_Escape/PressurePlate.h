@@ -29,6 +29,7 @@ public:
 	bool bIsPlateDocked = false;
 	void DockPlate();
 	void Shutdown();
+	void MoveTriggerVolume();
 
 
 protected:

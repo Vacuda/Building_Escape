@@ -10,6 +10,7 @@
 
 //forward declaration
 class UPressurePlate;
+class UAudioComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDING_ESCAPE_API UOpenDoor : public UActorComponent
@@ -22,6 +23,8 @@ public:
 
 	void MoveDoor(float DeltaTime);
 	void Shutdown();
+	void SetPressurePlateComponent();
+	void SetAudioComponent();
 
 	bool bIsDoorDocked = false;
 
@@ -37,16 +40,16 @@ private:
 
 	UPROPERTY()
 	UPressurePlate* PressurePlateComponent = nullptr;
+	UPROPERTY()
+	UAudioComponent* AudioComponent = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	AActor* DoorTriggerActor = nullptr;
-
 	UPROPERTY(EditAnywhere)
 	float DoorMoveSpeed=2.f;
-
 	UPROPERTY(EditAnywhere)
 	float DoorAngleChange = 90.f;
-
 	UPROPERTY(EditAnywhere)
 	float MassToOpenDoor = 100.f;
+
 };

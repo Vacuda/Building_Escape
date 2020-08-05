@@ -4,6 +4,7 @@
 #include "OpenDoor.h"
 #include "Kismet/GameplayStatics.h"  //for getallactorsofclass
 #include "UObject/Class.h"
+#include "Components/AudioComponent.h"  //for UAudioComponent
 // #include "Engine/World.h"  //for getworld
 #include "PressurePlate.h"  //for PressurePlate
 
@@ -25,12 +26,27 @@ void UOpenDoor::BeginPlay()
 	Target_Yaw = Initial_Yaw;
 	Final_Yaw = DoorAngleChange + Initial_Yaw;	
 
-	//set PressuePlateComponent
+	SetPressurePlateComponent();
+	SetAudioComponent();
+}
+
+void UOpenDoor::SetPressurePlateComponent()
+{
 	PressurePlateComponent = DoorTriggerActor->FindComponentByClass<UPressurePlate>();
 
 	//safety check
 	if(!PressurePlateComponent){
 		UE_LOG(LogTemp, Error, TEXT("No pressure plate component found on %s!"), *GetOwner()->GetName());
+	}
+}
+
+void UOpenDoor::SetAudioComponent()
+{
+	AudioComponent = GetOwner()->FindComponentByClass<UAudioComponent>();
+
+	//safety check
+	if(!AudioComponent){
+		UE_LOG(LogTemp, Error, TEXT("No audio component found on %s!"), *GetOwner()->GetName());
 	}
 }
 
@@ -95,6 +111,11 @@ void UOpenDoor::RotationCorrection(float* Yaw)
 void UOpenDoor::Shutdown(){
 
 	bIsDoorDocked = true;
+
+	//ptr check
+	if(!AudioComponent){return;}
+	
+	AudioComponent->Play();
 
 	//stop tick
 	PrimaryComponentTick.SetTickFunctionEnable(false);

@@ -48,6 +48,8 @@ void UPressurePlate::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	MoveTriggerVolume();
+
 	SetTotalMassOfActors();
 }
 
@@ -91,4 +93,11 @@ void UPressurePlate::Shutdown(){
 
 	//stop tick
 	PrimaryComponentTick.SetTickFunctionEnable(false);
+}
+
+void UPressurePlate::MoveTriggerVolume(){
+
+		// set TriggerVolume location to top of Pressure plate
+		PressurePlate->SetActorLocation(GetOwner()->GetActorLocation());
+		
 }
